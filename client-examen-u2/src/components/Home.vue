@@ -2,6 +2,7 @@
   <div class="container-fluid p-2">
     <!-- Carousel -->
     <div id="carousel-shower" v-if="showCarousel">
+
       <b-row no-gutters class="carousel-container mb-4">
         <b-col cols="12">
           <b-carousel
@@ -28,74 +29,74 @@
           </b-carousel>
         </b-col>
       </b-row>
-
-      <!-- Controls -->
-      <b-row no-gutters class="controls-container">
-        <b-col cols="12" lg="3" class="px-2 mb-2">
-          <b-button @click="getAllBooksBy('autor')" variant="primary" block>Ordenar por autor</b-button>
-        </b-col>
-        <b-col cols="12" lg="3" class="px-2 mb-2">
-          <b-button @click="getAllBooksBy('fecha')" variant="primary" block>Ordenar por fecha</b-button>
-        </b-col>
-        <b-col cols="12" lg="3" class="px-2 mb-2">
-          <b-button @click="getAllBooksBy('imagen')" variant="primary" block>Mostrar si tiene imagen</b-button>
-        </b-col>
-        <b-col cols="12" lg="3" class="px-2 mb-2">
-          <b-button v-b-modal.modal-create-book variant="info" block>
-            <b-icon icon="plus-circle-fill" class="mr-2"></b-icon>
-          </b-button>
-          <ModalCreateBook @book-created="getAllBooks"/>
-          <ModalEditBook @book-created="getAllBooks" :book="draggedBook"/>
-        </b-col>
-      </b-row>
-
-      <!-- Books -->
-      <b-row no-gutters class="books-container my-3">
-        <b-col cols="12" lg="8">
-          <b-row no-gutters>
-            <b-col cols="12" md="6" lg="4" class="px-2 mb-2" v-for="(book, index) in books" :key="index">
-              <b-card
-                  :title="book.titulo"
-                  :img-src="book.portada || 'https://via.placeholder.com/420x640.png?text=Sin%20Imagen'"
-                  img-alt="Image"
-                  img-top
-                  tag="article"
-                  draggable="true"
-                  @dragstart="handleDragStart(book, $event)"
-              >
-                <b-card-text>{{ book.autor }}</b-card-text>
-                <b-card-text>
-                  <small class="text-muted
-                  ">Fecha de publicación: {{ book.fechaPublicacion }}</small>
-                </b-card-text>
-              </b-card>
-            </b-col>
-          </b-row>
-        </b-col>
-
-        <b-col cols="12" lg="4">
-          <b-row no-gutters>
-            <b-col cols="12">
-              <div class="edit-zone"
-                   @dragover.prevent
-                   @drop="handleDropOnEditZone"
-              >
-                <b-icon icon="pencil-fill" class="mr-2"></b-icon>
-              </div>
-            </b-col>
-            <b-col cols="12">
-              <div class="delete-zone"
-                   @dragover.prevent
-                   @drop="handleDropOnDeleteZone"
-              >
-                <b-icon icon="trash-fill" class="mr-2"></b-icon>
-              </div>
-            </b-col>
-          </b-row>
-        </b-col>
-      </b-row>
-
     </div>
+
+
+    <!-- Controls -->
+    <b-row no-gutters class="controls-container">
+      <b-col cols="12" lg="3" class="px-2 mb-2">
+        <b-button @click="getAllBooksBy('autor')" variant="primary" block>Ordenar por autor</b-button>
+      </b-col>
+      <b-col cols="12" lg="3" class="px-2 mb-2">
+        <b-button @click="getAllBooksBy('fecha')" variant="primary" block>Ordenar por fecha</b-button>
+      </b-col>
+      <b-col cols="12" lg="3" class="px-2 mb-2">
+        <b-button @click="getAllBooksBy('imagen')" variant="primary" block>Mostrar si tiene imagen</b-button>
+      </b-col>
+      <b-col cols="12" lg="3" class="px-2 mb-2">
+        <b-button v-b-modal.modal-create-book variant="info" block>
+          <b-icon icon="plus-circle-fill" class="mr-2"></b-icon>
+        </b-button>
+        <ModalCreateBook @book-created="getAllBooks"/>
+        <ModalEditBook @book-created="getAllBooks" :book="draggedBook"/>
+      </b-col>
+    </b-row>
+
+    <!-- Books -->
+    <b-row no-gutters class="books-container my-3">
+      <b-col cols="12" lg="8">
+        <b-row no-gutters>
+          <b-col cols="12" md="6" lg="4" class="px-2 mb-2" v-for="(book, index) in books" :key="index">
+            <b-card
+                :title="book.titulo"
+                :img-src="book.portada || 'https://via.placeholder.com/420x640.png?text=Sin%20Imagen'"
+                img-alt="Image"
+                img-top
+                tag="article"
+                draggable="true"
+                @dragstart="handleDragStart(book, $event)"
+            >
+              <b-card-text>{{ book.autor }}</b-card-text>
+              <b-card-text>
+                <small class="text-muted
+                  ">Fecha de publicación: {{ book.fechaPublicacion }}</small>
+              </b-card-text>
+            </b-card>
+          </b-col>
+        </b-row>
+      </b-col>
+
+      <b-col cols="12" lg="4">
+        <b-row no-gutters>
+          <b-col cols="12">
+            <div class="edit-zone"
+                 @dragover.prevent
+                 @drop="handleDropOnEditZone"
+            >
+              <b-icon icon="pencil-fill" class="mr-2"></b-icon>
+            </div>
+          </b-col>
+          <b-col cols="12">
+            <div class="delete-zone"
+                 @dragover.prevent
+                 @drop="handleDropOnDeleteZone"
+            >
+              <b-icon icon="trash-fill" class="mr-2"></b-icon>
+            </div>
+          </b-col>
+        </b-row>
+      </b-col>
+    </b-row>
   </div>
 </template>
 
@@ -116,6 +117,7 @@ export default Vue.extend({
       // Carousel
       slide: 0,
       showCarousel: true,
+      carouselHidden: false,
 
       // Books
       draggedBook: null,
@@ -170,12 +172,21 @@ export default Vue.extend({
 
     handleScroll() {
       let scroll = window.scrollY;
-      let carouselTop = document.getElementById('carousel-shower').offsetTop;
-      let carouselHeight = document.getElementById('carousel-shower').offsetHeight;
-      let carouselBottom = carouselTop + carouselHeight;
 
-      this.showCarousel = scroll <= carouselBottom;
-      console.log(this.showCarousel)
+      console.log(scroll);
+
+      // Verifica si el carrusel ya se ha ocultado y el scroll es mayor a 500 para no hacer nada
+      if (this.carouselHidden && scroll > 500) return;
+
+      // Si el scroll es menor o igual a 500 y el carrusel estaba oculto, permite que se muestre
+      if (scroll <= 500) {
+        this.showCarousel = true;
+        this.carouselHidden = false; // Restablece la bandera cuando el usuario sube
+      } else {
+        // Si el scroll es mayor a 500, oculta el carrusel y establece la bandera
+        this.showCarousel = false;
+        this.carouselHidden = true; // Marca que el carrusel se ha ocultado
+      }
     },
 
     handleDragStart(book, event) {
