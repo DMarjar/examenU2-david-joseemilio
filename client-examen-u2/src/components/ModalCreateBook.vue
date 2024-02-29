@@ -93,6 +93,7 @@
 
 <script>
 import Vue from 'vue'
+import BookService from "@/services/BookService";
 
 export default Vue.extend({
   name: 'ModalCreateBook',
@@ -115,6 +116,12 @@ export default Vue.extend({
         autor: this.author,
         fechaPublicacion: publicationDate,
         portada: this.image
+      }
+      const response = await BookService.saveBook(book)
+      if (response.status === 201) {
+        this.$emit('book-created')
+        window.location.reload()
+        this.handleClose()
       }
     },
     handleClose

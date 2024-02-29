@@ -1,7 +1,7 @@
 <template>
   <div class="container-fluid p-2">
     <!-- Carousel -->
-    <div id="carousel-shower" v-show="showCarousel">
+    <div id="carousel-shower" v-if="showCarousel">
       <b-row no-gutters class="carousel-container mb-4">
         <b-col cols="12">
           <b-carousel
@@ -19,11 +19,11 @@
             <b-carousel-slide
                 v-for="(book, index) in books"
                 :key="index"
-                :caption="book.title"
-                :img-src="book.image"
-                :img-alt="book.title"
+                :caption="book.titulo"
+                :img-src="book.portada || 'https://via.placeholder.com/420x640.png?text=Sin%20Imagen'"
+                :img-alt="book.titulo"
             >
-              <p>{{ book.author }}</p>
+              <p>{{ book.autor }}</p>
             </b-carousel-slide>
           </b-carousel>
         </b-col>
@@ -32,20 +32,20 @@
       <!-- Controls -->
       <b-row no-gutters class="controls-container">
         <b-col cols="12" lg="3" class="px-2 mb-2">
-          <b-button variant="primary" block>Ordenar por autor</b-button>
+          <b-button @click="getAllBooksBy('autor')" variant="primary" block>Ordenar por autor</b-button>
         </b-col>
         <b-col cols="12" lg="3" class="px-2 mb-2">
-          <b-button variant="primary" block>Ordenar por fecha</b-button>
+          <b-button @click="getAllBooksBy('fecha')" variant="primary" block>Ordenar por fecha</b-button>
         </b-col>
         <b-col cols="12" lg="3" class="px-2 mb-2">
-          <b-button variant="primary" block>Mostrar si tiene imagen</b-button>
+          <b-button @click="getAllBooksBy('imagen')" variant="primary" block>Mostrar si tiene imagen</b-button>
         </b-col>
         <b-col cols="12" lg="3" class="px-2 mb-2">
           <b-button v-b-modal.modal-create-book variant="info" block>
             <b-icon icon="plus-circle-fill" class="mr-2"></b-icon>
           </b-button>
-          <ModalCreateBook/>
-          <ModalEditBook :book="draggedBook"/>
+          <ModalCreateBook @book-created="getAllBooks"/>
+          <ModalEditBook @book-created="getAllBooks" :book="draggedBook"/>
         </b-col>
       </b-row>
 
@@ -55,15 +55,19 @@
           <b-row no-gutters>
             <b-col cols="12" md="6" lg="4" class="px-2 mb-2" v-for="(book, index) in books" :key="index">
               <b-card
-                  :title="book.title"
-                  :img-src="book.image"
+                  :title="book.titulo"
+                  :img-src="book.portada || 'https://via.placeholder.com/420x640.png?text=Sin%20Imagen'"
                   img-alt="Image"
                   img-top
                   tag="article"
                   draggable="true"
                   @dragstart="handleDragStart(book, $event)"
               >
-                <b-card-text>{{ book.author }}</b-card-text>
+                <b-card-text>{{ book.autor }}</b-card-text>
+                <b-card-text>
+                  <small class="text-muted
+                  ">Fecha de publicación: {{ book.fechaPublicacion }}</small>
+                </b-card-text>
               </b-card>
             </b-col>
           </b-row>
@@ -99,6 +103,7 @@
 import Vue from "vue";
 import ModalCreateBook from "@/components/ModalCreateBook.vue";
 import ModalEditBook from "@/components/ModalEditBook.vue";
+import BookService from "@/services/BookService.js";
 
 export default Vue.extend({
   name: "Home",
@@ -114,11 +119,55 @@ export default Vue.extend({
 
       // Books
       draggedBook: null,
-      books: []
+      books: [
+        {
+          id: 1,
+          title: "El principito",
+          author: "Antoine de Saint-Exupéry",
+          image: `https://picsum.photos/1024/480?random=${Math.random() * 100}`
+        }
+      ],
+
+      // Paginator
+      sortBy: "title",
+      sortDesc: false,
+      perPage: 20,
+      currentPage: 1,
     };
   },
 
   methods: {
+    async getAllBooks() {
+      this.books = [];
+      try {
+        const data = await BookService.getAllBooks(
+            parseInt(this.currentPage) - 1,
+            parseInt(this.perPage),
+            this.sortBy,
+        );
+        this.books = data.content;
+      } catch (error) {
+        console.error(error);
+      }
+    },
+
+    async getAllBooksBy(sort) {
+      switch (sort) {
+        case 'autor':
+          const dataByAuthor = await BookService.getBookByAutor();
+          this.books = dataByAuthor.content;
+          break;
+        case 'fecha':
+          const dataByDate = await BookService.getBookByFecha();
+          this.books = dataByDate.content;
+          break;
+        case 'imagen':
+          const dataByImage = await BookService.getBookByImagen();
+          this.books = dataByImage.content;
+          break;
+      }
+    },
+
     handleScroll() {
       let scroll = window.scrollY;
       let carouselTop = document.getElementById('carousel-shower').offsetTop;
@@ -126,6 +175,7 @@ export default Vue.extend({
       let carouselBottom = carouselTop + carouselHeight;
 
       this.showCarousel = scroll <= carouselBottom;
+      console.log(this.showCarousel)
     },
 
     handleDragStart(book, event) {
@@ -142,12 +192,15 @@ export default Vue.extend({
       }
     },
 
-    handleDropOnDeleteZone(event) {
+    async handleDropOnDeleteZone(event) {
       event.preventDefault();
       const bookId = event.dataTransfer.getData("bookId");
       const bookToDelete = this.books.find(book => book.id === bookId) || this.draggedBook;
       if (bookToDelete) {
-        this.books = this.books.filter(book => book.id !== bookToDelete.id);
+        const data = await BookService.deleteBook(bookToDelete);
+        if (data) {
+          await this.getAllBooks();
+        }
       }
     },
 
@@ -157,6 +210,7 @@ export default Vue.extend({
   },
 
   mounted() {
+    this.getAllBooks();
     window.addEventListener('scroll', this.handleScroll);
   },
 

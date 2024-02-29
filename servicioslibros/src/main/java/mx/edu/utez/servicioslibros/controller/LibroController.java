@@ -22,12 +22,12 @@ public class LibroController {
 
 
     @PostMapping("/save")
-    BeanLibro save (BeanLibro beanLibro) {
+    BeanLibro save (@RequestBody BeanLibro beanLibro) {
         return libroRepository.saveAndFlush(beanLibro);
     }
 
     @PostMapping("/delete")
-    boolean delete (BeanLibro beanLibro) {
+    boolean delete (@RequestBody BeanLibro beanLibro) {
         libroRepository.delete(beanLibro);
         return true;
     }

@@ -5,7 +5,7 @@
       ok-title="Guardar"
       cancel-title="Cancelar"
       @ok="handleOk"
-      @cancel="handleCancel"
+      @cancel="handleClose"
       @shown="handleShow"
       no-stacking
       centered
@@ -89,6 +89,7 @@
 
 <script>
 import Vue from 'vue'
+import BookService from "@/services/BookService";
 
 export default Vue.extend({
   name: 'ModalEditBook',
@@ -119,16 +120,25 @@ export default Vue.extend({
     async handleOk() {
       const publicationDate = `${this.year}-${this.month}-${this.day}`
       const book = {
+        id: this.book.id,
         titulo: this.title,
         autor: this.author,
         fechaPublicacion: publicationDate,
         portada: this.image
       };
+      const data = await BookService.saveBook(book);
+      if (data) {
+        this.$emit('book-created', data);
+        window.location.reload()
+        this.handleClose();
+      }
     },
-    handleCancel() {
+    handleClose() {
       this.title = ''
       this.author = ''
-      this.publicationDate = ''
+      this.year = ''
+      this.month = ''
+      this.day = ''
       this.image = ''
     }
   },
