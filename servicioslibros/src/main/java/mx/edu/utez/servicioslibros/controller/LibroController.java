@@ -37,6 +37,18 @@ public class LibroController {
         return libroRepository.findById(beanLibro.getId()).orElse(null);
     }
 
+    @GetMapping("/autor")
+    Page<BeanLibro> orderByAutor (Pageable pageable) {
+        return libroRepository.findByOrderByAutorDesc(pageable);
+    }
 
+    @GetMapping("/fecha")
+    Page<BeanLibro> orderByFecha (Pageable pageable) {
+        return libroRepository.findByOrderByFechaPublicacionDesc(pageable);
+    }
 
+    @GetMapping("/imagen")
+    Page<BeanLibro> soloImagen (Pageable pageable) {
+        return libroRepository.findByPortadaIsNotNull(pageable);
+    }
 }
