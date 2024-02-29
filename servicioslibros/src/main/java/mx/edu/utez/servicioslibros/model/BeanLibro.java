@@ -7,7 +7,7 @@ import lombok.NoArgsConstructor;
 import java.time.LocalDate;
 
 @Data
-@Table
+@Table(name = "libros")
 @Entity
 @NoArgsConstructor
 public class BeanLibro {
